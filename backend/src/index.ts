@@ -1,6 +1,6 @@
 import express, { Request, Response } from "express";
 import http from "http";
-import { Server } from "socket.io";
+import { Server, } from "socket.io";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -20,11 +20,16 @@ const io = new Server(server, {
 
 io.on("connection" , (socket) => {
   console.log("A user is connected", socket.id);
+  const username = socket.handshake.query.username;
+  console.log(`Username : ${username}`);
+
+
   // Event listener for receiving messages
   socket.on("chat message", (msg) => {
-    console.log(`Received message :${msg}`);
-    // Broadcasting message to all clients
-      socket.broadcast.emit("chat msg", msg);
+   console.log(msg.sender);
+   console.log(msg.receiver);
+   console.log(msg.text);
+
   });
 
   socket.on("disconnect" , () => {

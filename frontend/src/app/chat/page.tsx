@@ -11,7 +11,11 @@ function Chat() {
 
   useEffect(() => {
     // Establish WebSocket connection
-    const newSocket = io("http://localhost:8080");
+    const newSocket = io("http://localhost:8080", {
+      query: {
+        username: "kishore",
+      },
+    });
     setSocket(newSocket);
 
     // Listen for incoming msgs
@@ -30,10 +34,22 @@ function Chat() {
     };
   }, []);
 
+  type Msg = {
+    text: string;
+    sender: string;
+    receiver: string;
+  };
+
   const sendMsg = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    const msgToBeSent: Msg = {
+      text: msg,
+      sender: "amit",
+      receiver: "keerti",
+    };
+
     if (socket) {
-      socket.emit("chat message", msg);
+      socket.emit("chat message", msgToBeSent);
       setMsgs((prevMsgs) => [...prevMsgs, { text: msg, sentByCurrUser: true }]);
       setMsg("");
     } else {
