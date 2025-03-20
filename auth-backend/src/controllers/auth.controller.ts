@@ -34,8 +34,8 @@ export const signup = async (
         password: hashedPassword,
       },
     });
-   
-    generateJWTTokenAndSetCookie(user.id.toString(), res);
+
+    generateJWTTokenAndSetCookie(user, res);
     res.status(201).json({
       message: "User registered successfully",
       user: { id: user.id, username: user.username },
