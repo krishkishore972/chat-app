@@ -1,19 +1,38 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { io, Socket } from "socket.io-client";
-
+import { useAuthStore } from "../zustand/useAuthStore";
+import { useUserStore } from "../zustand/useUserStore";
+import axios from "axios";
+import ChatUsers from "@/components/ui/home/chatUsers";
+import { useChatReceiverStore } from "../zustand/useChatReceiverStore";
 function Chat() {
   const [msg, setMsg] = useState("");
   const [msgs, setMsgs] = useState<{ text: string; sentByCurrUser: boolean }[]>(
     []
   );
   const [socket, setSocket] = useState<typeof Socket | null>(null);
+  const { authName } = useAuthStore();
+  const { setUsers } = useUserStore();
+  const { chatReceiver } = useChatReceiverStore();
+
+  const getUserData = async () => {
+    try {
+      const res = await axios.get("http://localhost:5000/users", {
+        withCredentials: true,
+      });
+      console.log(res.data);
+      setUsers(res.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   useEffect(() => {
     // Establish WebSocket connection
     const newSocket = io("http://localhost:8080", {
       query: {
-        username: "kishore",
+        username: authName,
       },
     });
     setSocket(newSocket);
@@ -26,13 +45,13 @@ function Chat() {
         { text: msgrecv, sentByCurrUser: false },
       ]);
     });
-
+    getUserData();
     // Cleanup function to close the connection
     return () => {
       newSocket.off("chat msg");
       newSocket.close();
     };
-  }, []);
+  }, [setUsers]);
 
   type Msg = {
     text: string;
@@ -44,8 +63,8 @@ function Chat() {
     e.preventDefault();
     const msgToBeSent: Msg = {
       text: msg,
-      sender: "amit",
-      receiver: "keerti",
+      sender: authName,
+      receiver: "user2",
     };
 
     if (socket) {
@@ -58,46 +77,54 @@ function Chat() {
   };
 
   return (
-    <div className="h-screen flex flex-col">
-      <div className="msgs-container h-4/5 overflow-y-auto p-4">
-        {msgs.map((msg, index) => (
-          <div
-            key={index}
-            className={`flex ${
-              msg.sentByCurrUser ? "justify-end" : "justify-start"
-            } m-2`}
-          >
-            <span
-              className={`px-4 py-2 rounded-lg max-w-xs break-words ${
-                msg.sentByCurrUser
-                  ? "bg-blue-500 text-white"
-                  : "bg-green-500 text-white"
-              }`}
-            >
-              {msg.text}
-            </span>
-          </div>
-        ))}
+    <div className="h-screen divide-x-4 flex">
+      <div className="w-1/4 ">
+        <ChatUsers />
       </div>
-      <div className="h-1/5 flex items-center justify-center">
-        <form onSubmit={sendMsg} className="w-1/2">
-          <div className=" relative">
-            <input
-              type="text"
-              value={msg}
-              onChange={(e) => setMsg(e.target.value)}
-              placeholder="Type your text here"
-              required
-              className="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-            />
-            <button
-              type="submit"
-              className="text-white absolute end-2.5 bottom-2.5 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+      <div className=" w-4/5 flex flex-col">
+        <div className="h-1/5 flex items-center justify-center">
+          <h1 className="text-2xl font-bold">Chat with {chatReceiver}</h1>
+        </div>
+        <div className="msgs-container h-3/5 overflow-y-auto p-4">
+          {msgs.map((msg, index) => (
+            <div
+              key={index}
+              className={`flex ${
+                msg.sentByCurrUser ? "justify-end" : "justify-start"
+              } m-2`}
             >
-              Send
-            </button>
-          </div>
-        </form>
+              <span
+                className={`px-4 py-2 rounded-lg max-w-xs break-words ${
+                  msg.sentByCurrUser
+                    ? "bg-blue-500 text-white"
+                    : "bg-green-500 text-white"
+                }`}
+              >
+                {msg.text}
+              </span>
+            </div>
+          ))}
+        </div>
+        <div className="h-1/5 flex items-center justify-center">
+          <form onSubmit={sendMsg} className="w-1/2">
+            <div className=" relative">
+              <input
+                type="text"
+                value={msg}
+                onChange={(e) => setMsg(e.target.value)}
+                placeholder="Type your text here"
+                required
+                className="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              />
+              <button
+                type="submit"
+                className="text-white absolute end-2.5 bottom-2.5 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+              >
+                Send
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   );

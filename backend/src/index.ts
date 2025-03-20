@@ -1,6 +1,6 @@
 import express, { Request, Response } from "express";
 import http from "http";
-import { Server, } from "socket.io";
+import { Server, Socket } from "socket.io";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -18,24 +18,54 @@ const io = new Server(server, {
   },
 });
 
-io.on("connection" , (socket) => {
-  console.log("A user is connected", socket.id);
-  const username = socket.handshake.query.username;
-  console.log(`Username : ${username}`);
+interface ChatMessage {
+  sender: string;
+  receiver: string;
+  text: string;
+}
 
+interface SocketMap {
+  [username: string]: Socket;
+}
+const userSocketMap: SocketMap = {};
+
+io.on("connection", (socket: Socket) => {
+  console.log("A user is connected", socket.id);
+
+  // Get username from query params
+  const username = socket.handshake.query.username;
+  const usernameStr = Array.isArray(username) ? username[0] : username;
+  console.log(`Username: ${usernameStr}`);
+
+  // Store socket reference
+  if (usernameStr) {
+    userSocketMap[usernameStr] = socket;
+  }
 
   // Event listener for receiving messages
   socket.on("chat message", (msg) => {
-   console.log(msg.sender);
-   console.log(msg.receiver);
-   console.log(msg.text);
+    if (msg && typeof msg === "object") {
+      console.log("Sender:", msg.sender);
+      console.log("Receiver:", msg.receiver);
+      console.log("Text:", msg.text);
 
+      // Forward message to receiver if they're online
+      if (msg.receiver && userSocketMap[msg.receiver]) {
+        userSocketMap[msg.receiver].emit("chat message", msg);
+      }
+    }
   });
 
-  socket.on("disconnect" , () => {
-    console.log(`user disconnected : ${socket.id}`);
-  })
-})
+  // Handle disconnection
+  socket.on("disconnect", () => {
+    console.log(`User disconnected: ${socket.id}`);
+
+    // Remove user from socket map
+    if (usernameStr) {
+      delete userSocketMap[usernameStr];
+    }
+  });
+});
 
 app.get("/", (req: Request, res: Response) => {
   res.send("Hello World");
