@@ -64,7 +64,7 @@ function Chat() {
     const msgToBeSent: Msg = {
       text: msg,
       sender: authName,
-      receiver: "user2",
+      receiver: chatReceiver,
     };
 
     if (socket) {
@@ -83,7 +83,7 @@ function Chat() {
       </div>
       <div className=" w-4/5 flex flex-col">
         <div className="h-1/5 flex items-center justify-center">
-          <h1 className="text-2xl font-bold">Chat with {chatReceiver}</h1>
+          <h1 className="text-2xl font-bold">{authName} Chat with {chatReceiver}</h1>
         </div>
         <div className="msgs-container h-3/5 overflow-y-auto p-4">
           {msgs.map((msg, index) => (

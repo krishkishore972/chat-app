@@ -2,12 +2,16 @@ import express, { Request, Response } from "express";
 import http from "http";
 import { Server, Socket } from "socket.io";
 import dotenv from "dotenv";
+import prisma from "./prismaClient";
+import { addMsgToConversation } from "./controllers/msgs.controller";
+import msgRouter from "./routes/msg.route";
 
 dotenv.config();
 const PORT = process.env.PORT || 5000;
 
 const app = express();
 app.use(express.json());
+app.use("/msgs", msgRouter);
 const server = http.createServer(app); // Create an HTTP server
 
 const io = new Server(server, {
@@ -48,11 +52,17 @@ io.on("connection", (socket: Socket) => {
       console.log("Sender:", msg.sender);
       console.log("Receiver:", msg.receiver);
       console.log("Text:", msg.text);
-
-      // Forward message to receiver if they're online
-      if (msg.receiver && userSocketMap[msg.receiver]) {
-        userSocketMap[msg.receiver].emit("chat message", msg);
+      const receiverSocket = userSocketMap[msg.receiver];
+      if (receiverSocket) {
+        receiverSocket.emit("chat msg", msg.text);
+      } else {
+        console.error("Receiver socket not found");
       }
+      addMsgToConversation([msg.sender, msg.receiver], {
+        text: msg.text,
+        sender: msg.sender,
+        receiver: msg.receiver,
+      });
     }
   });
 

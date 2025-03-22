@@ -2,15 +2,15 @@
 import axios from "axios";
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import {useAuthStore} from "../zustand/useAuthStore";
+import { useAuthStore } from "../zustand/useAuthStore";
 
 function Auth() {
   const router = useRouter();
   const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const {authName,setAuthName} = useAuthStore();
-
+  const { authName, setAuthName } = useAuthStore();
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,6 +19,7 @@ function Auth() {
       const response = await axios.post(
         "http://localhost:5000/auth/signup",
         {
+          email,
           username,
           password,
         },
@@ -46,6 +47,7 @@ function Auth() {
     setError("");
     try {
       const response = await axios.post("http://localhost:5000/auth/signin", {
+        email,
         username,
         password,
       });
@@ -76,6 +78,22 @@ function Auth() {
                   type="username"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
+                  required
+                  className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium leading-6 text-gray-900">
+                email
+              </label>
+              <div className="mt-2">
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   required
                   className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                 />

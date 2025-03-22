@@ -10,15 +10,15 @@ export const signup = async (
   res:Response
 ) => {
   try {
-    const { username, password } = req.body;
+    const { email, password,username } = req.body;
 
-    if (!username || !password) {
-      res.status(400).json({ message: "Username and password are required" });
+    if (!email || !password) {
+      res.status(400).json({ message: "Email and password are required" });
       return;
     }
 
     const existingUser = await prisma.user.findUnique({
-      where: { username: username },
+      where: { email: email },
     });
     if (existingUser) {
       res.status(400).json({
@@ -30,15 +30,16 @@ export const signup = async (
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = await prisma.user.create({
       data: {
-        username,
+        email,
         password: hashedPassword,
+        username,
       },
     });
 
-    generateJWTTokenAndSetCookie(user, res);
+    generateJWTTokenAndSetCookie(user.id, res);
     res.status(201).json({
       message: "User registered successfully",
-      user: { id: user.id, username: user.username },
+      user: { id: user.id, email: user.username },
     });
   } catch (error) {
     console.error("Signup error:", error);
@@ -51,15 +52,15 @@ export const signin = async (
   res: Response
 ) => {
   try {
-    const { username, password } = req.body;
+    const { email, password } = req.body;
 
-    if (!username || !password) {
-      res.status(400).json({ message: "Username and password are required" });
+    if (!email || !password) {
+      res.status(400).json({ message: "email and password are required" });
       return;
     }
 
     const user = await prisma.user.findUnique({
-      where: { username: username },
+      where: { email: email },
     });
 
     if (!user || !(await bcrypt.compare(password, user.password))) {
