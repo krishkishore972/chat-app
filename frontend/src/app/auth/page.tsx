@@ -17,7 +17,7 @@ function Auth() {
     setError("");
     try {
       const response = await axios.post(
-        "http://localhost:5000/auth/signup",
+        "http://localhost:8000/auth/signup",
         {
           email,
           username,
@@ -46,7 +46,7 @@ function Auth() {
     e.preventDefault();
     setError("");
     try {
-      const response = await axios.post("http://localhost:5000/auth/signin", {
+      const response = await axios.post("http://localhost:8000/auth/signin", {
         email,
         username,
         password,
