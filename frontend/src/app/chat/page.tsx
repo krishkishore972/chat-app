@@ -1,11 +1,12 @@
 "use client";
-import React, { useEffect, useState } from "react";
-import { io, Socket } from "socket.io-client";
+import React, { useCallback, useEffect, useState } from "react";
+import io, { Socket } from "socket.io-client";
 import { useAuthStore } from "../zustand/useAuthStore";
 import { useUserStore } from "../zustand/useUserStore";
 import axios from "axios";
-import ChatUsers from "@/components/ui/home/chatUsers";
+import ChatUsers from "@/components/ui/home/ChatUsers";
 import { useChatReceiverStore } from "../zustand/useChatReceiverStore";
+
 function Chat() {
   const [msg, setMsg] = useState("");
   const [msgs, setMsgs] = useState<{ text: string; sentByCurrUser: boolean }[]>(
@@ -16,9 +17,9 @@ function Chat() {
   const { setUsers } = useUserStore();
   const { chatReceiver } = useChatReceiverStore();
 
-  const getUserData = async () => {
+  const getUserData = useCallback(async () => {
     try {
-      const res = await axios.get("http://localhost:5000/users", {
+      const res = await axios.get("http://localhost:8000/users", {
         withCredentials: true,
       });
       console.log(res.data);
@@ -26,11 +27,11 @@ function Chat() {
     } catch (error) {
       console.error(error);
     }
-  };
+  }, [setUsers]);
 
   useEffect(() => {
     // Establish WebSocket connection
-    const newSocket = io("http://localhost:8080", {
+    const newSocket = io("http://localhost:5000", {
       query: {
         username: authName,
       },
@@ -51,7 +52,7 @@ function Chat() {
       newSocket.off("chat msg");
       newSocket.close();
     };
-  }, [setUsers]);
+  }, [authName, getUserData, setUsers]);
 
   type Msg = {
     text: string;
