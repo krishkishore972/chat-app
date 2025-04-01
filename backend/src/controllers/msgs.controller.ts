@@ -53,24 +53,25 @@ export const getMessages = async (req: Request, res: Response) => {
     const participants: Participants = [sender as string, receiver as string];
     const conversation = await prisma.conversation.findFirst({
       where: {
-        users: {
-          hasEvery: participants,
-        },
+        AND: [
+          { users: { has: sender as string } },
+          { users: { has: receiver as string } },
+        ],
       },
       include: {
-        messages: true, // Include the related messages
+        messages: true,
       },
     });
     if (!conversation) {
       console.log("Conversation not found");
-       res.status(200).send();
-       return;
+      res.status(200).send();
+      return;
     }
-     res.json(conversation.messages);
-     return;
+    res.json(conversation.messages);
+    return;
   } catch (error) {
     console.error(error);
-     res.status(500).json({ error: "Internal server error" });
-     return;
+    res.status(500).json({ error: "Internal server error" });
+    return;
   }
 };

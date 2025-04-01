@@ -1,23 +1,58 @@
-import React from "react";
+
+
+import React, { useEffect } from "react";
 import { useUserStore } from "@/app/zustand/useUserStore";
 import { useChatReceiverStore } from "@/app/zustand/useChatReceiverStore";
 import { useChatMsgsStore } from "@/app/zustand/useChatMsgsStore";
 import axios from "axios";
+import { useAuthStore } from "@/app/zustand/useAuthStore";
+
+
 
 function ChatUsers() {
   const { users } = useUserStore();
-  const { setChatReceiver } = useChatReceiverStore();
-  const updateChatReceiver = (username: string) => {
-    setChatReceiver(username);
+  const { chatReceiver,setChatReceiver } = useChatReceiverStore();
+  const {authName} = useAuthStore();
+  const{updateChatMsgs} = useChatMsgsStore();
+
+  type User = {
+    id: number;
+    username: string;
+    password: string;
+    createdAt: string;
   };
+  const updateChatReceiver = (user:User) => {
+    setChatReceiver(user.username);
+  };
+
+  useEffect(() => {
+    const getMsgs = async () => {
+      const res = await axios.get("http://localhost:8080/msgs", {
+        params: {
+          'sender': authName,
+          'receiver': chatReceiver,
+        },
+        withCredentials: true,
+      });
+      if (res.data.length != 0) {
+        updateChatMsgs(res.data);
+      } else {
+        updateChatMsgs([]);
+      }
+    }
+    if(chatReceiver){
+      getMsgs();
+    }
+  },[chatReceiver,authName]);
 
   return (
     <div>
       {users.map((user, index) => (
         <div
-        onClick={() => updateChatReceiver(user.username)}
-        className="bg-slate-400 rounded-xl m-3 p-5 cursor-pointer"
-         key={index}>
+          onClick={() => updateChatReceiver(user)}
+          className="rounded-xl m-3 p-5 cursor-pointer hover:bg-blue-500 hover:text-white font-semibold text-lg hover:rounded-lg duration-300"
+          key={index}
+        >
           {user.username}
         </div>
       ))}

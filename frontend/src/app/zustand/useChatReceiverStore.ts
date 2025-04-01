@@ -1,5 +1,6 @@
 import {create} from 'zustand';
 
+
 type Store = {
     chatReceiver: string;
     setChatReceiver: (receiver: string) => void;

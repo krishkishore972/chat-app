@@ -1,8 +1,8 @@
+import cors from "cors";
+import dotenv from "dotenv";
 import express, { Request, Response } from "express";
 import http from "http";
 import { Server, Socket } from "socket.io";
-import dotenv from "dotenv";
-import prisma from "./prismaClient";
 import { addMsgToConversation } from "./controllers/msgs.controller";
 import msgRouter from "./routes/msg.route";
 
@@ -11,14 +11,35 @@ const PORT = process.env.PORT || 5000;
 
 const app = express();
 app.use(express.json());
+
+app.use(
+  cors({
+    allowedHeaders: ["Content-Type", "Authorization"],
+    origin: [
+      "http://localhost:3000",
+      "http://localhost:3001",
+      "http://localhost:3002",
+    ],
+    credentials: true,
+    methods: "GET, POST, PUT, DELETE", // Allowed methods
+  })
+);
+
 app.use("/msgs", msgRouter);
+
 const server = http.createServer(app); // Create an HTTP server
 
 const io = new Server(server, {
   // Pass the created HTTP server here
   cors: {
-    allowedHeaders: ["*"],
-    origin: "*",
+    allowedHeaders: ["Content-Type", "Authorization"],
+    origin: [
+      "http://localhost:3000",
+      "http://localhost:3001",
+      "http://localhost:3002",
+    ],
+    credentials: true,
+    methods: "GET, POST, PUT, DELETE", // Allowed methods
   },
 });
 
