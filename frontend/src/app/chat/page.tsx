@@ -58,7 +58,7 @@ function Chat() {
       newSocket.off("chat msg");
       newSocket.close();
     };
-  }, [setUsers, authName, chatReceiver, chatMsgs, updateChatMsgs]);
+  }, [setUsers]);
 
 
   const sendMsg = (e: React.FormEvent<HTMLFormElement>) => {
@@ -70,10 +70,12 @@ function Chat() {
     };
 
     if (socket) {
-      socket.emit("chat message", msgToBeSent);
+      socket.emit("chat message", msgToBeSent.text);
       updateChatMsgs([...chatMsgs,msgToBeSent ]);
       // setMsgs((prevMsgs) => [...prevMsgs, { text: msg, sentByCurrUser: true }]);
       setMsg("");
+      console.log("msg sent from client " + msgToBeSent.text);
+
     } else {
       console.error("Socket is not connected");
     }
