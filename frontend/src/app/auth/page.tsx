@@ -50,7 +50,10 @@ function Auth() {
         email,
         username,
         password,
-      });
+      },{
+        withCredentials: true,
+      }
+      );
       console.log(response);
       setAuthName(response.data.user.username);
       router.push("/chat");

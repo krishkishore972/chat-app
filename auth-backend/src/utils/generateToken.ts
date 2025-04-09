@@ -14,8 +14,7 @@ const generateJWTTokenAndSetCookie = (userId: string, res: Response): void => {
     maxAge: 15 * 24 * 60 * 60 * 1000, // milliseconds
     httpOnly: true,
     sameSite: "strict",
-    secure: process.env.NODE_ENV === "production", // true in production, false in development
-    path:"/"
+    secure: process.env.NODE_ENV === "production", // Set to true in production
   });
 };
 

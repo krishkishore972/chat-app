@@ -43,11 +43,7 @@ const io = new Server(server, {
   },
 });
 
-interface ChatMessage {
-  sender: string;
-  receiver: string;
-  text: string;
-}
+
 
 interface SocketMap {
   [username: string]: Socket;
@@ -68,14 +64,15 @@ io.on("connection", (socket: Socket) => {
   }
 
   // Event listener for receiving messages
-  socket.on("chat message", (msg) => {
+  socket.on("chat msg", (msg) => {
     if (msg && typeof msg === "object") {
       console.log("Sender:", msg.sender);
       console.log("Receiver:", msg.receiver);
       console.log("Text:", msg.text);
       const receiverSocket = userSocketMap[msg.receiver];
       if (receiverSocket) {
-        receiverSocket.emit("chat msg", msg.text);
+        receiverSocket.emit("chat msg", msg);
+        console.log("Message sent to receiver:", msg.receiver);
       } else {
         console.error("Receiver socket not found");
       }
@@ -83,6 +80,8 @@ io.on("connection", (socket: Socket) => {
         text: msg.text,
         sender: msg.sender,
         receiver: msg.receiver,
+      }).catch((error) => {
+        console.error("Failed to save message to database:", error);
       });
     }
   });

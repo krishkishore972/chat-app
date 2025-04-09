@@ -35,9 +35,9 @@ function ChatUsers() {
         withCredentials: true,
       });
       if (res.data.length != 0) {
-        updateChatMsgs(res.data);
+        updateChatMsgs((prev) => [...prev, ...res.data]); 
       } else {
-        updateChatMsgs([]);
+        updateChatMsgs(() => []); // clear messages
       }
     }
     if(chatReceiver){

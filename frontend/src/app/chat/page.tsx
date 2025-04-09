@@ -45,12 +45,12 @@ function Chat() {
     // Listen for incoming msgs
     newSocket.on("chat msg", (msgrecv: Msg) => {
       console.log("received msg on client " + msgrecv);
-      updateChatMsgs([...chatMsgs, msgrecv]);
+      updateChatMsgs((prev) => [...prev, msgrecv]); // <- if you update store to accept function form
+
       // setMsgs((prevMsgs) => [
       //   ...prevMsgs,
       //   { text: msgrecv, sentByCurrUser: false },
       // ]);
-
     });
     getUserData();
     // Cleanup function to close the connection
@@ -70,12 +70,10 @@ function Chat() {
     };
 
     if (socket) {
-      socket.emit("chat message", msgToBeSent.text);
-      updateChatMsgs([...chatMsgs,msgToBeSent ]);
-      // setMsgs((prevMsgs) => [...prevMsgs, { text: msg, sentByCurrUser: true }]);
-      setMsg("");
+      socket.emit("chat msg", msgToBeSent);
+      updateChatMsgs((prev) => [...prev, msgToBeSent]); // update state
+      setMsg(""); // clear input
       console.log("msg sent from client " + msgToBeSent.text);
-
     } else {
       console.error("Socket is not connected");
     }

@@ -1,15 +1,13 @@
 import { create } from "zustand";
 import { Msg } from "@/lib/types";
 
-
-
-
 type Store = {
-  chatMsgs: Msg[]; // Store messages of type `Msg`
-  updateChatMsgs: (chatMsgs: Msg[]) => void; // Update function expects `Msg[]`
+  chatMsgs: Msg[];
+  updateChatMsgs: (updater: (prev: Msg[]) => Msg[]) => void;
 };
 
 export const useChatMsgsStore = create<Store>((set) => ({
   chatMsgs: [],
-  updateChatMsgs: (chatMsgs) => set({ chatMsgs }),
+  updateChatMsgs: (updater) =>
+    set((state) => ({ chatMsgs: updater(state.chatMsgs) })),
 }));

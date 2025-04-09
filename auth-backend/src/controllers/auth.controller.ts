@@ -68,7 +68,7 @@ export const signin = async (
       return;
     }
 
-    generateJWTTokenAndSetCookie(user.id.toString(), res);
+    generateJWTTokenAndSetCookie(user.id, res);
     res.status(200).json({
       message: "Login successful",
       user: { id: user.id, username: user.username },
